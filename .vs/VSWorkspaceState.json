@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\ChatLib",
+    "\\ChatLib\\bin",
+    "\\ChatLib\\ChatLib",
+    "\\ChatLib\\ChatLib\\bin",
+    "\\ChatLib\\ChatLib\\Sockets"
+  ],
+  "SelectedNode": "\\ChatLib\\ChatLib\\ChatLib.csproj",
+  "PreviewInSolutionExplorer": false
+}

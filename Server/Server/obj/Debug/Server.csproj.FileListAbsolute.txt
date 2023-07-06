@@ -1,0 +1,15 @@
+C:\Users\최은아\source\repos\day2\Server\Server\bin\Debug\Server.exe.config
+C:\Users\최은아\source\repos\day2\Server\Server\bin\Debug\Server.exe
+C:\Users\최은아\source\repos\day2\Server\Server\bin\Debug\Server.pdb
+C:\Users\최은아\source\repos\day2\Server\Server\obj\Debug\Server.csproj.AssemblyReference.cache
+C:\Users\최은아\source\repos\day2\Server\Server\obj\Debug\Server.Form1.resources
+C:\Users\최은아\source\repos\day2\Server\Server\obj\Debug\Server.Properties.Resources.resources
+C:\Users\최은아\source\repos\day2\Server\Server\obj\Debug\Server.csproj.GenerateResource.cache
+C:\Users\최은아\source\repos\day2\Server\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\Users\최은아\source\repos\day2\Server\Server\obj\Debug\Server.exe
+C:\Users\최은아\source\repos\day2\Server\Server\obj\Debug\Server.pdb
+C:\Users\최은아\source\repos\day2\Server\Server\bin\Debug\ChatLib.dll
+C:\Users\최은아\source\repos\day2\Server\Server\bin\Debug\Newtonsoft.Json.dll
+C:\Users\최은아\source\repos\day2\Server\Server\bin\Debug\ChatLib.pdb
+C:\Users\최은아\source\repos\day2\Server\Server\bin\Debug\Newtonsoft.Json.xml
+C:\Users\최은아\source\repos\day2\Server\Server\obj\Debug\Server.csproj.CopyComplete
