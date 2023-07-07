@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ChatLib.Models;
-
+using static ChatLib.Models.ChatHub;
 
 namespace Client
 {
@@ -63,5 +63,40 @@ namespace Client
             stream.Write(messageBuffer,0, messageBuffer.Length);
 
         }
+
+        // 대기버튼
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            if (button1.Text == "대기중")
+            {
+                button1.Text = "인원없음";
+                await SendButtonState("인원없음");
+            }
+            else if (button1.Text == "인원없음")
+            {
+                button1.Text = "대기중";
+                await SendButtonState("대기중");
+            }
+        }
+
+        private async Task SendButtonState(string state)
+        {
+            NetworkStream stream = client.GetStream();
+
+            // 데이터 직렬화
+            ButtonStateData data = new ButtonStateData
+            {
+                State = state
+            };
+
+            var messageBuffer = Encoding.UTF8.GetBytes(data.ToJsonString());
+
+            var massageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
+
+            await stream.WriteAsync(massageLengthBuffer, 0, massageLengthBuffer.Length);
+            await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
+        }
+
+
     }
 }

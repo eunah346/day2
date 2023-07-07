@@ -31,13 +31,14 @@ namespace Server
         {
             this.button1 = new System.Windows.Forms.Button();
             this.listBox1 = new System.Windows.Forms.ListBox();
+            this.button2 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(24, 26);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(78, 35);
+            this.button1.Size = new System.Drawing.Size(98, 44);
             this.button1.TabIndex = 0;
             this.button1.Text = "시작";
             this.button1.UseVisualStyleBackColor = true;
@@ -47,16 +48,26 @@ namespace Server
             // 
             this.listBox1.FormattingEnabled = true;
             this.listBox1.ItemHeight = 12;
-            this.listBox1.Location = new System.Drawing.Point(120, 25);
+            this.listBox1.Location = new System.Drawing.Point(141, 26);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(344, 244);
+            this.listBox1.Size = new System.Drawing.Size(420, 292);
             this.listBox1.TabIndex = 1;
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(24, 91);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(98, 44);
+            this.button2.TabIndex = 2;
+            this.button2.Text = "대기중";
+            this.button2.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(476, 450);
+            this.ClientSize = new System.Drawing.Size(584, 411);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.button1);
             this.Name = "Form1";
@@ -69,6 +80,7 @@ namespace Server
 
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.Button button2;
     }
 }
 

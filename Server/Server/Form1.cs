@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ChatLib.Models;
+using static ChatLib.Models.ChatHub;
+using Newtonsoft.Json;
 
 
 namespace Server
@@ -54,9 +56,21 @@ namespace Server
 
                 string message = Encoding.UTF8.GetString(buffer, 0, read);  // 텍스트로 변환
                 // 역직렬화
+                ButtonStateData buttonState = JsonConvert.DeserializeObject<ButtonStateData>(message);
+
                 ChatHub hub = ChatHub.Parse(message);
-                listBox1.Items.Add($"UserID : {hub.UserId}, RoomId : {hub.RoomId}," + 
+                listBox1.Items.Add($"UserID : {hub.UserId}, RoomId : {hub.RoomId}," +
                                     $"UserName : {hub.UserName}, Message : {hub.Message}");
+
+                // 버튼 상태 처리
+                if (buttonState.State == "인원없음")
+                {
+                    button2.Text = "인원없음";
+                }
+                else if (buttonState.State == "대기중")
+                {
+                    button2.Text = "대기중";
+                }
 
                 var messageBuffer = Encoding.UTF8.GetBytes($"Server: {message}");
                 stream.Write(messageBuffer, 0, messageBuffer.Length);

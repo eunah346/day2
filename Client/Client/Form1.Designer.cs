@@ -33,6 +33,7 @@ namespace Client
             this.btnSend = new System.Windows.Forms.Button();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnConnect
@@ -47,7 +48,7 @@ namespace Client
             // 
             // btnSend
             // 
-            this.btnSend.Location = new System.Drawing.Point(23, 98);
+            this.btnSend.Location = new System.Drawing.Point(470, 342);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(98, 44);
             this.btnSend.TabIndex = 1;
@@ -61,21 +62,32 @@ namespace Client
             this.listBox1.ItemHeight = 12;
             this.listBox1.Location = new System.Drawing.Point(148, 15);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(420, 304);
+            this.listBox1.Size = new System.Drawing.Size(420, 292);
             this.listBox1.TabIndex = 2;
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(23, 62);
+            this.textBox1.Location = new System.Drawing.Point(148, 355);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(98, 21);
+            this.textBox1.Size = new System.Drawing.Size(307, 21);
             this.textBox1.TabIndex = 3;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(23, 76);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(98, 44);
+            this.button1.TabIndex = 4;
+            this.button1.Text = "대기중";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(580, 450);
+            this.ClientSize = new System.Drawing.Size(584, 411);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.btnSend);
@@ -93,6 +105,7 @@ namespace Client
         private System.Windows.Forms.Button btnSend;
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button button1;
     }
 }
 

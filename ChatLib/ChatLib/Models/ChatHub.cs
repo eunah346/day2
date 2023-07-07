@@ -17,6 +17,15 @@ namespace ChatLib.Models
 
         // 직렬화
         public string ToJsonString() => JsonConvert.SerializeObject(this);
+
+        public class ButtonStateData
+        {
+            public string State { get; set; }
+            public string ToJsonString()
+            {
+                return JsonConvert.SerializeObject(this);
+            }
+        }
     }
 
 }
