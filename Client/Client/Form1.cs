@@ -36,7 +36,10 @@ namespace Client
             {
                 string message = Encoding.UTF8.GetString(buffer, 0, read);  // 텍스트로 변환
 
-                listBox1.Items.Add(message);
+                listBox1.Invoke((MethodInvoker)delegate
+                {
+                    listBox1.Items.Add(message);
+                });
             }
         }
 
@@ -62,6 +65,17 @@ namespace Client
             stream.Write(massageLengthBuffer,0, massageLengthBuffer.Length);
             stream.Write(messageBuffer,0, messageBuffer.Length);
 
+
+            // 서버로부터 메시지 수신
+            byte[] receiveSizeBuffer = new byte[4];
+            await stream.ReadAsync(receiveSizeBuffer, 0, receiveSizeBuffer.Length);
+
+            int receiveSize = BitConverter.ToInt32(receiveSizeBuffer, 0);
+            byte[] receiveBuffer = new byte[receiveSize];
+
+            await stream.ReadAsync(receiveBuffer, 0, receiveBuffer.Length);
+
+            string receiveMessage = Encoding.UTF8.GetString(receiveBuffer, 0, receiveBuffer.Length);
         }
 
         // 대기버튼
@@ -78,7 +92,7 @@ namespace Client
                 await SendButtonState("대기중");
             }
         }
-
+        
         private async Task SendButtonState(string state)
         {
             NetworkStream stream = client.GetStream();
@@ -96,7 +110,5 @@ namespace Client
             await stream.WriteAsync(massageLengthBuffer, 0, massageLengthBuffer.Length);
             await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
         }
-
-
     }
 }

@@ -69,7 +69,7 @@ namespace Client
             // 
             this.textBox1.Location = new System.Drawing.Point(148, 355);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(307, 21);
+            this.textBox1.Size = new System.Drawing.Size(300, 21);
             this.textBox1.TabIndex = 3;
             // 
             // button1

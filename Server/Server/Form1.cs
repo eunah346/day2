@@ -18,6 +18,7 @@ namespace Server
             InitializeComponent();
         }
 
+        //private TcpClient client; //****
         private TcpListener listener;
 
         private async void button1_Click(object sender, EventArgs e)
@@ -55,12 +56,18 @@ namespace Server
                     break;
 
                 string message = Encoding.UTF8.GetString(buffer, 0, read);  // 텍스트로 변환
+
                 // 역직렬화
                 ButtonStateData buttonState = JsonConvert.DeserializeObject<ButtonStateData>(message);
 
                 ChatHub hub = ChatHub.Parse(message);
-                listBox1.Items.Add($"UserID : {hub.UserId}, RoomId : {hub.RoomId}," +
-                                    $"UserName : {hub.UserName}, Message : {hub.Message}");
+                string formattedMessage = $"UserID : {hub.UserId}, RoomId : {hub.RoomId}," +
+                                  $"UserName : {hub.UserName}, Message : {hub.Message}";
+
+                listBox1.Invoke((MethodInvoker)delegate
+                {
+                    listBox1.Items.Add(formattedMessage);
+                });
 
                 // 버튼 상태 처리
                 if (buttonState.State == "인원없음")
@@ -72,8 +79,52 @@ namespace Server
                     button2.Text = "대기중";
                 }
 
-                var messageBuffer = Encoding.UTF8.GetBytes($"Server: {message}");
-                stream.Write(messageBuffer, 0, messageBuffer.Length);
+                // 클라이언트로 메시지 전송
+                //string serverMessage = message;
+                byte[] messageBuffer = Encoding.UTF8.GetBytes(message);
+                await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
+            }
+        }
+
+        private async void btnSend_Click(object sender, EventArgs e)
+        {
+            using (TcpClient client = new TcpClient())
+            {
+                await client.ConnectAsync(IPAddress.Parse("127.0.0.1"), 8080);
+
+            
+                NetworkStream stream = client.GetStream();
+
+                string text = textBox1.Text;   // 텍스트 전송
+
+                // 데이터 직렬화
+                ChatHub hub = new ChatHub
+                {
+                    UserId = 1,
+                    RoomId = 2,
+                    UserName = "사과",
+                    Message = text
+                };
+
+                var messageBuffer = Encoding.UTF8.GetBytes(hub.ToJsonString());
+
+                var massageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
+
+                //stream.Write(massageLengthBuffer, 0, massageLengthBuffer.Length);
+                //stream.Write(messageBuffer, 0, messageBuffer.Length);
+                await stream.WriteAsync(massageLengthBuffer, 0, massageLengthBuffer.Length);
+                await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
+
+                // 클라이언트로부터 메시지 수신
+                byte[] receiveSizeBuffer = new byte[4];
+                await stream.ReadAsync(receiveSizeBuffer, 0, receiveSizeBuffer.Length);
+
+                int receiveSize = BitConverter.ToInt32(receiveSizeBuffer, 0);
+                byte[] receiveBuffer = new byte[receiveSize];
+
+                await stream.ReadAsync(receiveBuffer, 0, receiveBuffer.Length);
+
+                string receiveMessage = Encoding.UTF8.GetString(receiveBuffer, 0, receiveBuffer.Length);
             }
         }
     }
