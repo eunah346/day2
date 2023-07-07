@@ -32,14 +32,17 @@ namespace Client
             // 데이터 읽기
             int read;
 
-            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            while (true)
             {
-                string message = Encoding.UTF8.GetString(buffer, 0, read);  // 텍스트로 변환
-
-                listBox1.Invoke((MethodInvoker)delegate
+                if((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                 {
-                    listBox1.Items.Add(message);
-                });
+                    string message = Encoding.UTF8.GetString(buffer, 0, read);  // 텍스트로 변환
+
+                    listBox1.Invoke((MethodInvoker)delegate
+                    {
+                        listBox1.Items.Add(message);
+                    });
+                }
             }
         }
 
@@ -67,15 +70,22 @@ namespace Client
 
 
             // 서버로부터 메시지 수신
-            byte[] receiveSizeBuffer = new byte[4];
-            await stream.ReadAsync(receiveSizeBuffer, 0, receiveSizeBuffer.Length);
+            //byte[] receiveSizeBuffer = new byte[4];
+            //await stream.ReadAsync(receiveSizeBuffer, 0, receiveSizeBuffer.Length);
 
-            int receiveSize = BitConverter.ToInt32(receiveSizeBuffer, 0);
-            byte[] receiveBuffer = new byte[receiveSize];
+            //int receiveSize = BitConverter.ToInt32(receiveSizeBuffer, 0);
+            //byte[] receiveBuffer = new byte[receiveSize];
 
-            await stream.ReadAsync(receiveBuffer, 0, receiveBuffer.Length);
+            //int totalBytesRead = 0;
+            //while (totalBytesRead < receiveSize)
+            //{
+            //    int bytesRead = await stream.ReadAsync(receiveBuffer, totalBytesRead, receiveSize - totalBytesRead);
+            //    if (bytesRead == 0)
+            //        throw new Exception("Connection closed prematurely.");
+            //    totalBytesRead += bytesRead;
+            //}
 
-            string receiveMessage = Encoding.UTF8.GetString(receiveBuffer, 0, receiveBuffer.Length);
+            //string receiveMessage = Encoding.UTF8.GetString(receiveBuffer, 0, receiveBuffer.Length);
         }
 
         // 대기버튼

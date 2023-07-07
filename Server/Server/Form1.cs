@@ -43,6 +43,7 @@ namespace Server
 
             while (true)
             {
+                string message = string.Empty;
                 read = await stream.ReadAsync(sizeBuffer, 0, sizeBuffer.Length);
 
                 if (read == 0)
@@ -51,18 +52,22 @@ namespace Server
                 int size = BitConverter.ToInt32(sizeBuffer,0);
                 byte[] buffer = new byte[size];
 
-                read = await stream.ReadAsync(buffer, 0, buffer.Length);
-                if (read == 0)
-                    break;
+                if (0 < size)
+                {
+                    int bytesRead = await stream.ReadAsync(buffer, 0, size);
+                    if (bytesRead == 0)
+                        throw new Exception("Connection closed prematurely.");
+                    
+                message = Encoding.UTF8.GetString(buffer, 0 , bytesRead);  // 텍스트로 변환
+                }
 
-                string message = Encoding.UTF8.GetString(buffer, 0, read);  // 텍스트로 변환
 
                 // 역직렬화
                 ButtonStateData buttonState = JsonConvert.DeserializeObject<ButtonStateData>(message);
 
                 ChatHub hub = ChatHub.Parse(message);
                 string formattedMessage = $"UserID : {hub.UserId}, RoomId : {hub.RoomId}," +
-                                  $"UserName : {hub.UserName}, Message : {hub.Message}";
+                                          $"UserName : {hub.UserName}, Message : {hub.Message}";
 
                 listBox1.Invoke((MethodInvoker)delegate
                 {
@@ -80,9 +85,10 @@ namespace Server
                 }
 
                 // 클라이언트로 메시지 전송
-                //string serverMessage = message;
                 byte[] messageBuffer = Encoding.UTF8.GetBytes(message);
                 await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
+
+
             }
         }
 
@@ -114,18 +120,20 @@ namespace Server
                 //stream.Write(messageBuffer, 0, messageBuffer.Length);
                 await stream.WriteAsync(massageLengthBuffer, 0, massageLengthBuffer.Length);
                 await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
+                stream.Flush();
 
-                // 클라이언트로부터 메시지 수신
-                byte[] receiveSizeBuffer = new byte[4];
-                await stream.ReadAsync(receiveSizeBuffer, 0, receiveSizeBuffer.Length);
+                //클라이언트로부터 메시지 수신
+                //byte[] receiveSizeBuffer = new byte[4];
+                //await stream.ReadAsync(receiveSizeBuffer, 0, receiveSizeBuffer.Length);
 
-                int receiveSize = BitConverter.ToInt32(receiveSizeBuffer, 0);
-                byte[] receiveBuffer = new byte[receiveSize];
+                //int receiveSize = BitConverter.ToInt32(receiveSizeBuffer, 0);
+                //byte[] receiveBuffer = new byte[receiveSize];
 
-                await stream.ReadAsync(receiveBuffer, 0, receiveBuffer.Length);
+                //await stream.ReadAsync(receiveBuffer, 0, receiveBuffer.Length);
 
-                string receiveMessage = Encoding.UTF8.GetString(receiveBuffer, 0, receiveBuffer.Length);
+                //string receiveMessage = Encoding.UTF8.GetString(receiveBuffer, 0, receiveBuffer.Length);
             }
+
         }
     }
 }
