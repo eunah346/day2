@@ -18,13 +18,20 @@ namespace Server
             InitializeComponent();
         }
 
-        //private TcpClient client; //****
-        private TcpListener listener;
+        private TcpClient client;
+        //private TcpListener listener;
+        TcpListener listener = null;
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 8080);
+            //listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 5000);
+            listener = new TcpListener(IPAddress.Parse(Properties.Settings.Default.IP_Set.ToString()), Convert.ToInt32(Properties.Settings.Default.Port_Set.ToString()));
             listener.Start();   // 서버 실행
+                                //richTextBox1.AppendText("시작되었습니다." + Environment.NewLine);
+            DisplayText($"시작 아이피 : {Properties.Settings.Default.IP_Set}");
+            DisplayText($"시작 포트 : {Properties.Settings.Default.Port_Set}");
+            DisplayText(">> 서버 시작");
+
 
             while (true)
             {
@@ -37,7 +44,7 @@ namespace Server
         private async Task HandleClient(TcpClient client)
         {
             NetworkStream stream = client.GetStream();
-            byte[] sizeBuffer = new byte[4]; // 임의 버퍼 생성, 읽을 바이트 크기 지정
+            byte[] sizeBuffer = new byte[1024]; // 임의 버퍼 생성, 읽을 바이트 크기 지정
             // 데이터 읽기
             int read;
 
@@ -52,13 +59,13 @@ namespace Server
                 int size = BitConverter.ToInt32(sizeBuffer,0);
                 byte[] buffer = new byte[size];
 
-                if (0 < size)
+                if (size > 0)
                 {
                     int bytesRead = await stream.ReadAsync(buffer, 0, size);
                     if (bytesRead == 0)
                         throw new Exception("Connection closed prematurely.");
                     
-                message = Encoding.UTF8.GetString(buffer, 0 , bytesRead);  // 텍스트로 변환
+                    message = Encoding.UTF8.GetString(buffer, 0 , bytesRead);  // 텍스트로 변환
                 }
 
 
@@ -69,10 +76,11 @@ namespace Server
                 string formattedMessage = $"UserID : {hub.UserId}, RoomId : {hub.RoomId}," +
                                           $"UserName : {hub.UserName}, Message : {hub.Message}";
 
-                listBox1.Invoke((MethodInvoker)delegate
+                richTextBox1.Invoke((MethodInvoker)delegate
                 {
-                    listBox1.Items.Add(formattedMessage);
+                    richTextBox1.AppendText(formattedMessage + Environment.NewLine);
                 });
+
 
                 // 버튼 상태 처리
                 if (buttonState.State == "인원없음")
@@ -87,18 +95,15 @@ namespace Server
                 // 클라이언트로 메시지 전송
                 byte[] messageBuffer = Encoding.UTF8.GetBytes(message);
                 await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
-
-
             }
         }
 
         private async void btnSend_Click(object sender, EventArgs e)
-        {
+         {
             using (TcpClient client = new TcpClient())
             {
-                await client.ConnectAsync(IPAddress.Parse("127.0.0.1"), 8080);
+                await client.ConnectAsync(IPAddress.Parse("192.168.0.31"), 5001);
 
-            
                 NetworkStream stream = client.GetStream();
 
                 string text = textBox1.Text;   // 텍스트 전송
@@ -109,18 +114,22 @@ namespace Server
                     UserId = 1,
                     RoomId = 2,
                     UserName = "사과",
-                    Message = text
+                    Message = text,
+                    State = ""
                 };
 
                 var messageBuffer = Encoding.UTF8.GetBytes(hub.ToJsonString());
 
-                var massageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
+                var messageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
+
+                await stream.WriteAsync(messageLengthBuffer, 0, messageLengthBuffer.Length);
+                await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
 
                 //stream.Write(massageLengthBuffer, 0, massageLengthBuffer.Length);
                 //stream.Write(messageBuffer, 0, messageBuffer.Length);
-                await stream.WriteAsync(massageLengthBuffer, 0, massageLengthBuffer.Length);
-                await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
-                stream.Flush();
+                //await stream.WriteAsync(massageLengthBuffer, 0, massageLengthBuffer.Length);
+                //await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
+                //stream.Flush();
 
                 //클라이언트로부터 메시지 수신
                 //byte[] receiveSizeBuffer = new byte[4];
@@ -134,6 +143,18 @@ namespace Server
                 //string receiveMessage = Encoding.UTF8.GetString(receiveBuffer, 0, receiveBuffer.Length);
             }
 
+        }
+        private void DisplayText(string text)
+        {
+            if (richTextBox1.InvokeRequired)
+            {
+                richTextBox1.BeginInvoke(new MethodInvoker(delegate
+                {
+                    richTextBox1.AppendText(text + Environment.NewLine);
+                }));
+            }
+            else
+                richTextBox1.AppendText(text + Environment.NewLine);
         }
     }
 }

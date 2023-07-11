@@ -21,8 +21,18 @@ namespace Client
         private async void btnConnect_Click(object sender, EventArgs e)
         {
             client = new TcpClient();
-            await client.ConnectAsync(IPAddress.Parse("127.0.0.1"), 8080);
-            _ = HandleClient(client);
+            try
+            {
+                await client.ConnectAsync(IPAddress.Parse("192.168.0.31"), 5000);
+                //await client.ConnectAsync(IPAddress.Parse("127.0.0.1"), 5000);
+
+                richTextBox1.AppendText(">> 서버와 연결되었습니다." + Environment.NewLine);
+                _ = HandleClient(client);
+
+            } catch (Exception ex)
+            {
+                richTextBox1.AppendText("서버 연결에 실패했습니다: " + ex.Message + Environment.NewLine);
+            }
         }
 
         private async Task HandleClient(TcpClient client)
@@ -31,19 +41,43 @@ namespace Client
             byte[] buffer = new byte[1024]; // 임의 버퍼 생성, 읽을 바이트 크기 지정
             // 데이터 읽기
             int read;
-
-            while (true)
+            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
-                if((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                string message = Encoding.UTF8.GetString(buffer, 0, read);// 텍스트로 변환
+                richTextBox1.Invoke((MethodInvoker)delegate
                 {
-                    string message = Encoding.UTF8.GetString(buffer, 0, read);  // 텍스트로 변환
-
-                    listBox1.Invoke((MethodInvoker)delegate
-                    {
-                        listBox1.Items.Add(message);
-                    });
-                }
+                    DisplayText(message);
+                });
             }
+            //****
+            //while (true)
+            //{
+
+            //    if ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            //    {
+            //        string message = Encoding.UTF8.GetString(buffer, 0, read);  
+
+            //        richTextBox1.Invoke((MethodInvoker)delegate
+            //        {
+            //            //DisplayText(">> 서버와 연결");
+            //            DisplayText(message);
+            //            //richTextBox1.AppendText(message);
+            //        });
+            //    }
+            //}
+        }
+
+        private void DisplayText(string text)
+        {
+            if (richTextBox1.InvokeRequired)
+            {
+                richTextBox1.BeginInvoke(new MethodInvoker(delegate
+                {
+                    richTextBox1.AppendText(text + Environment.NewLine);
+                }));
+            }
+            else
+                richTextBox1.AppendText(text + Environment.NewLine);
         }
 
         private async void btnSend_Click(object sender, EventArgs e)
@@ -58,15 +92,16 @@ namespace Client
                 UserId = 1,
                 RoomId = 2,
                 UserName = "사과",
-                Message = text
+                Message = text,
+                State = ""
             };
 
             var messageBuffer = Encoding.UTF8.GetBytes(hub.ToJsonString());
 
             var massageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
 
-            stream.Write(massageLengthBuffer,0, massageLengthBuffer.Length);
-            stream.Write(messageBuffer,0, messageBuffer.Length);
+            stream.Write(massageLengthBuffer, 0, massageLengthBuffer.Length);
+            stream.Write(messageBuffer, 0, messageBuffer.Length);
 
 
             // 서버로부터 메시지 수신
@@ -102,18 +137,31 @@ namespace Client
                 await SendButtonState("대기중");
             }
         }
-        
+
         private async Task SendButtonState(string state)
         {
             NetworkStream stream = client.GetStream();
 
+            //// 데이터 직렬화
+            //ButtonStateData data = new ButtonStateData
+            //{
+            //    State = state
+
+            //};
+
             // 데이터 직렬화
-            ButtonStateData data = new ButtonStateData
+            ChatHub hub = new ChatHub
             {
+                UserId = 1,
+                RoomId = 2,
+                UserName = "사과",
+                Message = state,
                 State = state
             };
 
-            var messageBuffer = Encoding.UTF8.GetBytes(data.ToJsonString());
+
+            //var messageBuffer = Encoding.UTF8.GetBytes(data.ToJsonString());
+            var messageBuffer = Encoding.UTF8.GetBytes(hub.ToJsonString());
 
             var massageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
 

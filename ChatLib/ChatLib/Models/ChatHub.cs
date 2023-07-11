@@ -14,6 +14,7 @@ namespace ChatLib.Models
         public string UserName { get; set; } = string.Empty;
         public int RoomId { get; set; }
         public string Message { get; set; } = string.Empty;
+        public string State { get; set; } = string.Empty;
 
         // 직렬화
         public string ToJsonString() => JsonConvert.SerializeObject(this);
