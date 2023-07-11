@@ -26,13 +26,21 @@ namespace Client
             
             try
             {
-                await client.ConnectAsync(IPAddress.Parse("192.168.0.31"), 5000);
-                //await client.ConnectAsync(IPAddress.Parse("127.0.0.1"), 5000);
-
-                richTextBox1.AppendText(">> 서버와 연결되었습니다." + Environment.NewLine);
-                _ = HandleClient(client);
                 listener = new TcpListener(IPAddress.Parse("192.168.0.31"), 5050);
                 listener.Start();
+
+                //await client.ConnectAsync(IPAddress.Parse("127.0.0.1"), 5000);
+                    await client.ConnectAsync(IPAddress.Parse("192.168.0.31"), 5000);
+
+                richTextBox1.AppendText(">> 서버와 연결되었습니다." + Environment.NewLine);
+
+                while (true)
+                {
+                    TcpClient tcpClient = await listener.AcceptTcpClientAsync();   // 연결 대기 (비동기)
+                    _ = HandleClient(tcpClient);   // 클라이언트 핸들링
+
+                }
+                // _ = Receive();  // 메세지 수신
 
             } catch (Exception ex)
             {
@@ -74,43 +82,6 @@ namespace Client
             }
         }
 
-        // 서버 메세지 수신
-        private async Task Receive()
-        {
-            byte[] sizeBuffer = new byte[4];
-            byte[] messageBuffer;
-            int read;
-
-            while (true)
-            {
-                read = await stream.ReadAsync(sizeBuffer, 0, sizeBuffer.Length);
-
-                if (read == 0)
-                    break;
-
-                int messageSize = BitConverter.ToInt32(sizeBuffer, 0);
-                messageBuffer = new byte[messageSize];
-
-                if (messageSize > 0)
-                {
-                    int totalBytesRead = 0;
-                    while (totalBytesRead < messageSize)
-                    {
-                        int bytesRead = await stream.ReadAsync(messageBuffer, totalBytesRead, messageSize - totalBytesRead);
-                        if (bytesRead == 0)
-                            throw new Exception("오류");
-                        totalBytesRead += bytesRead;
-                    }
-
-                    string message = Encoding.UTF8.GetString(messageBuffer);
-                    richTextBox1.Invoke((MethodInvoker)delegate
-                    {
-                        DisplayText(message);
-                    });
-                }
-            }
-        }
-
         private void DisplayText(string text)
         {
             if (richTextBox1.InvokeRequired)
@@ -124,7 +95,7 @@ namespace Client
                 richTextBox1.AppendText(text + Environment.NewLine);
         }
 
-        private async void btnSend_Click(object sender, EventArgs e)
+        private void btnSend_Click(object sender, EventArgs e)
         {
             NetworkStream stream = client.GetStream();
 
@@ -141,10 +112,11 @@ namespace Client
             };
 
             var messageBuffer = Encoding.UTF8.GetBytes(hub.ToJsonString());
+            DisplayText(hub.ToJsonString());
 
-            //var massageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
+            var massageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
 
-            //stream.Write(massageLengthBuffer, 0, massageLengthBuffer.Length);
+            stream.Write(massageLengthBuffer, 0, massageLengthBuffer.Length);
             stream.Write(messageBuffer, 0, messageBuffer.Length);
 
         }

@@ -32,14 +32,17 @@ namespace Server
             DisplayText($"시작 포트 : {Properties.Settings.Default.Port_Set}");
             DisplayText(">> 서버 시작");
 
-            while (true)
-            {
-                TcpClient client = await listener.AcceptTcpClientAsync();   // 연결 대기 (비동기)
 
-                _ = HandleClient(client);
-                DisplayText(">> 클라이언트 연결완료");
+                // clientMessage 초기화
                 clientMessage = new TcpClient();
                 await clientMessage.ConnectAsync(IPAddress.Parse("192.168.0.31"), 5050);
+
+            while (true)
+            {
+                TcpClient tcpClient = await listener.AcceptTcpClientAsync();   // 연결 대기 (비동기)
+                _ = HandleClient(tcpClient);
+
+                DisplayText(">> 클라이언트 연결완료");
             }
         }
 
@@ -79,7 +82,8 @@ namespace Server
 
                 richTextBox1.Invoke((MethodInvoker)delegate
                 {
-                    richTextBox1.AppendText(formattedMessage + Environment.NewLine);
+                    DisplayText(formattedMessage);
+                    //richTextBox1.AppendText(formattedMessage + Environment.NewLine);
                 });
 
 
@@ -99,7 +103,7 @@ namespace Server
             }
         }
 
-        private async void btnSend_Click(object sender, EventArgs e)
+        private void btnSend_Click(object sender, EventArgs e)
          {
             //using (TcpClient client = new TcpClient())
 
@@ -120,11 +124,13 @@ namespace Server
                     State = ""
                 };
 
-                var messageBuffer = Encoding.UTF8.GetBytes(hub.ToJsonString());
-                //var messageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
+            var messageBuffer = Encoding.UTF8.GetBytes(hub.ToJsonString());
+            DisplayText(hub.ToJsonString());
 
-                //await stream.WriteAsync(messageLengthBuffer, 0, messageLengthBuffer.Length);
-                await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
+            var messageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
+
+            stream.Write(messageLengthBuffer, 0, messageLengthBuffer.Length);
+            stream.Write(messageBuffer, 0, messageBuffer.Length);
 
            // }
 
