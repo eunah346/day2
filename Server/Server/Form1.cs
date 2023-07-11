@@ -18,7 +18,7 @@ namespace Server
             InitializeComponent();
         }
 
-        private TcpClient client;
+        private TcpClient clientMessage;
         //private TcpListener listener;
         TcpListener listener = null;
 
@@ -32,12 +32,14 @@ namespace Server
             DisplayText($"시작 포트 : {Properties.Settings.Default.Port_Set}");
             DisplayText(">> 서버 시작");
 
-
             while (true)
             {
                 TcpClient client = await listener.AcceptTcpClientAsync();   // 연결 대기 (비동기)
 
                 _ = HandleClient(client);
+                DisplayText(">> 클라이언트 연결완료");
+                clientMessage = new TcpClient();
+                await clientMessage.ConnectAsync(IPAddress.Parse("192.168.0.31"), 5050);
             }
         }
 
@@ -67,7 +69,6 @@ namespace Server
                     
                     message = Encoding.UTF8.GetString(buffer, 0 , bytesRead);  // 텍스트로 변환
                 }
-
 
                 // 역직렬화
                 ButtonStateData buttonState = JsonConvert.DeserializeObject<ButtonStateData>(message);
@@ -100,11 +101,12 @@ namespace Server
 
         private async void btnSend_Click(object sender, EventArgs e)
          {
-            using (TcpClient client = new TcpClient())
-            {
-                await client.ConnectAsync(IPAddress.Parse("192.168.0.31"), 5001);
+            //using (TcpClient client = new TcpClient())
 
-                NetworkStream stream = client.GetStream();
+            //{
+                //await client.ConnectAsync(IPAddress.Parse("192.168.0.31"), 5050);
+
+                NetworkStream stream = clientMessage.GetStream();
 
                 string text = textBox1.Text;   // 텍스트 전송
 
@@ -119,29 +121,12 @@ namespace Server
                 };
 
                 var messageBuffer = Encoding.UTF8.GetBytes(hub.ToJsonString());
+                //var messageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
 
-                var messageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
-
-                await stream.WriteAsync(messageLengthBuffer, 0, messageLengthBuffer.Length);
+                //await stream.WriteAsync(messageLengthBuffer, 0, messageLengthBuffer.Length);
                 await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
 
-                //stream.Write(massageLengthBuffer, 0, massageLengthBuffer.Length);
-                //stream.Write(messageBuffer, 0, messageBuffer.Length);
-                //await stream.WriteAsync(massageLengthBuffer, 0, massageLengthBuffer.Length);
-                //await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
-                //stream.Flush();
-
-                //클라이언트로부터 메시지 수신
-                //byte[] receiveSizeBuffer = new byte[4];
-                //await stream.ReadAsync(receiveSizeBuffer, 0, receiveSizeBuffer.Length);
-
-                //int receiveSize = BitConverter.ToInt32(receiveSizeBuffer, 0);
-                //byte[] receiveBuffer = new byte[receiveSize];
-
-                //await stream.ReadAsync(receiveBuffer, 0, receiveBuffer.Length);
-
-                //string receiveMessage = Encoding.UTF8.GetString(receiveBuffer, 0, receiveBuffer.Length);
-            }
+           // }
 
         }
         private void DisplayText(string text)
