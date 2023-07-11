@@ -97,7 +97,7 @@ namespace Server
                     button2.Text = "대기중";
                 }
 
-                // 클라이언트로 메시지 전송
+                // 클라이언트로 버튼 상태 메시지 전송
                 byte[] messageBuffer = Encoding.UTF8.GetBytes(message);
                 await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
             }
@@ -146,6 +146,44 @@ namespace Server
             }
             else
                 richTextBox1.AppendText(text + Environment.NewLine);
+        }
+
+        private async void button2_Click(object sender, EventArgs e)
+        {
+            if (button2.Text == "대기중")
+            {
+                button2.Text = "인원없음";
+                await SendButtonState("인원없음");
+                DisplayText("인원없음 으로 변경");
+            }
+            else if (button2.Text == "인원없음")
+            {
+                button2.Text = "대기중";
+                await SendButtonState("대기중");
+                DisplayText("대기중 으로 변경");
+            }
+        }
+
+        private async Task SendButtonState(string state)
+        {
+            NetworkStream stream = clientMessage.GetStream();
+
+            // 데이터 직렬화
+            ChatHub hub = new ChatHub
+            {
+                UserId = 1,
+                RoomId = 2,
+                UserName = "사과",
+                Message = state,
+                State = state
+            };
+
+            var messageBuffer = Encoding.UTF8.GetBytes(hub.ToJsonString());
+
+            var massageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
+
+            await stream.WriteAsync(massageLengthBuffer, 0, massageLengthBuffer.Length);
+            await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
         }
     }
 }

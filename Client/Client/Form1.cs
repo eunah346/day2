@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ChatLib.Models;
 using static ChatLib.Models.ChatHub;
+using Newtonsoft.Json;
 
 namespace Client
 {
@@ -74,12 +75,34 @@ namespace Client
 
                     message = Encoding.UTF8.GetString(buffer, 0, bytesRead);  // 텍스트로 변환
                 }
+                ButtonStateData buttonState = JsonConvert.DeserializeObject<ButtonStateData>(message);
+                ChatHub hub = ChatHub.Parse(message);
+                string formattedMessage = $"UserID : {hub.UserId}, RoomId : {hub.RoomId}," +
+                                          $"UserName : {hub.UserName}, Message : {hub.Message}";
+
                 //string message = Encoding.UTF8.GetString(buffer, 0, read);// 텍스트로 변환
                 richTextBox1.Invoke((MethodInvoker)delegate
                 {
                     DisplayText(message);
                 });
+
+
+                // 버튼 상태 처리
+
+                if (buttonState.State == "인원없음")
+                {
+                    button1.Text = "인원없음";
+                }
+                else if (buttonState.State == "대기중")
+                {
+                    button1.Text = "대기중";
+                }
+                // 서버로 버튼 상태 메시지 전송
+                byte[] messageBuffer = Encoding.UTF8.GetBytes(message);
+                await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
+
             }
+
         }
 
         private void DisplayText(string text)
@@ -128,11 +151,13 @@ namespace Client
             {
                 button1.Text = "인원없음";
                 await SendButtonState("인원없음");
+                DisplayText("인원없음 으로 변경");
             }
             else if (button1.Text == "인원없음")
             {
                 button1.Text = "대기중";
-                await SendButtonState("대기중");
+                await SendButtonState("대기중"); 
+                DisplayText("대기중 으로 변경");
             }
         }
 
@@ -152,9 +177,9 @@ namespace Client
 
             var messageBuffer = Encoding.UTF8.GetBytes(hub.ToJsonString());
 
-            //var massageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
+            var massageLengthBuffer = BitConverter.GetBytes(messageBuffer.Length);
 
-            //await stream.WriteAsync(massageLengthBuffer, 0, massageLengthBuffer.Length);
+            await stream.WriteAsync(massageLengthBuffer, 0, massageLengthBuffer.Length);
             await stream.WriteAsync(messageBuffer, 0, messageBuffer.Length);
         }
     }
